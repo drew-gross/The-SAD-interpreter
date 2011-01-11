@@ -6,7 +6,6 @@
 *.sdf
 *.sln
 *.suo
-*.vcxproj
 *.tlog
 *.filters
 *.user
