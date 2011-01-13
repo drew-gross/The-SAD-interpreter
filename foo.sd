@@ -6,6 +6,7 @@ a
 a   =a str
 saad=drew
 saad+a
+a+
 b=saad
 {
 foo = bar

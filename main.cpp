@@ -169,9 +169,15 @@ int main() {
 			else if (contains(currentLine, '+'))
 			{
 				Variable *firstVar = Find(split(currentLine, '+').first);
-				Variable *secondVar = Find(split(currentLine, '+').second);
-
-				firstVar->second += secondVar->second;
+				if (split(currentLine, '+').second == "")
+				{
+					firstVar->second += '\n';
+				}
+				else 
+				{
+					Variable *secondVar = Find(split(currentLine, '+').second);
+					firstVar->second += secondVar->second;
+				}
 			}
 		}
 	}
