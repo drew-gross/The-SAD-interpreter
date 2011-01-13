@@ -5,12 +5,9 @@ ab = 5
 a
 a   =a str
 saad=drew
+saad+a
 b=saad
 {
-saad=
-?
-saad
-/
 foo = bar
 }
 quit=true

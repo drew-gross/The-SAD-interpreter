@@ -38,10 +38,16 @@ LinesOfCode ReadFile(char const * fileName)
 	}
 	return code;
 }
-Variable splitOnEquals(std::string const & str) {
-	int equalsSignIndex = str.find('=');
-	std::string varName(str.substr(0, equalsSignIndex));
-	std::string varVal(str.substr(equalsSignIndex + 1, str.length() - equalsSignIndex));
+
+bool contains(std::string const & str, char searchFor)
+{
+	return (str.find(searchFor) != -1);
+}
+
+std::pair<std::string, std::string> split(std::string const & str, char splitter) {
+	int splitterIndex = str.find(splitter);
+	std::string varName(str.substr(0, splitterIndex));
+	std::string varVal(str.substr(splitterIndex + 1, str.length() - splitterIndex));
 	return std::make_pair(varName, varVal);
 }
 
@@ -99,9 +105,7 @@ Variable* Find(const std::string &variableName )
 		{
 			return &*iVar;
 		}
-
 	}
-
 	return nullptr;
 }
 
@@ -127,12 +131,12 @@ int main() {
 				it++;
 			}
 		} 
-		else if (currentLine == ">") // goto next closing curly brace
+		else if (currentLine == ">") // output next line
 		{
 			it++;
 			std::cout << Find(*it)->second << std::endl;
 		} 
-		else if (currentLine == "?") // goto next closing curly brace
+		else if (currentLine == "?") // if next line is false, skip line after that
 		{
 			it++;
 			if (Find(*it)->second == "")
@@ -149,20 +153,25 @@ int main() {
 		}
 		else
 		{
-			Variable var = splitOnEquals(currentLine);
-			if ( var.first == "quit" && var.second == "true" )
+			if (contains(currentLine, '='))
 			{
-				break;
-			}
+				Variable var = split(currentLine, '=');
+				Variable &addedVariable = FindOrCreateVariable( var.first );
 
-			Variable &addedVariable = FindOrCreateVariable( var.first );
+				Variable *assigned = Find(var.second);
 
-			Variable *assigned = Find(var.second);
+				if (assigned == nullptr) {
+					addedVariable.second = var.second;
+				} else {
+					addedVariable.second = assigned->second;
+				}
+			} 
+			else if (contains(currentLine, '+'))
+			{
+				Variable *firstVar = Find(split(currentLine, '+').first);
+				Variable *secondVar = Find(split(currentLine, '+').second);
 
-			if (assigned == nullptr) {
-				addedVariable.second = var.second;
-			} else {
-				addedVariable.second = assigned->second;
+				firstVar->second += secondVar->second;
 			}
 		}
 	}
@@ -174,10 +183,9 @@ int main() {
 		std::cout << "Next scope" << std::endl;
 		for ( VariableMap::iterator it = sIt->begin(); it != sIt->end(); it++ )
 		{
-			std::cout << it->first << " = " << it->second << std::endl;
+			std::cout << it->first << "=" << it->second << std::endl;
 		}
 		std::cout << std::endl;
 	}
-
 	std::cin.get();
 }
