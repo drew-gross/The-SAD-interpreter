@@ -5,26 +5,28 @@
 #include <iostream>
 #include <list>
 
+using namespace std;
+
 void DebugBreakIf (const bool & breakCondition)
 {
 	if ( breakCondition )
 		__debugbreak();
 }
 
-typedef std::pair<const std::string, std::string> Variable;
-typedef std::map<const std::string, std::string> VariableMap;
-typedef std::list<VariableMap> VariableStacks;
-typedef std::vector<std::string> LinesOfCode;
+typedef pair<const string, string> Variable;
+typedef map<const string, string> VariableMap;
+typedef list<VariableMap> VariableStacks;
+typedef vector<string> LinesOfCode;
 
 VariableStacks variableStacks;
 
 LinesOfCode ReadFile(char const * fileName) 
 {
-	std::ifstream inFile(fileName, std::ifstream::in);
+	ifstream inFile(fileName, ifstream::in);
 	LinesOfCode code;
 	while (!inFile.eof()) 
 	{
-		std::string curLine;
+		string curLine;
 		char curChar = 0;
 		while (curChar != '\n' && !inFile.eof())
 		{
@@ -39,16 +41,16 @@ LinesOfCode ReadFile(char const * fileName)
 	return code;
 }
 
-bool contains(std::string const & str, char searchFor)
+bool contains(string const & str, char searchFor)
 {
 	return (str.find(searchFor) != -1);
 }
 
-std::pair<std::string, std::string> split(std::string const & str, char splitter) {
+pair<string, string> split(string const & str, char splitter) {
 	int splitterIndex = str.find(splitter);
-	std::string varName(str.substr(0, splitterIndex));
-	std::string varVal(str.substr(splitterIndex + 1, str.length() - splitterIndex));
-	return std::make_pair(varName, varVal);
+	string varName(str.substr(0, splitterIndex));
+	string varVal(str.substr(splitterIndex + 1, str.length() - splitterIndex));
+	return make_pair(varName, varVal);
 }
 
 void CreateNewScope ()
@@ -60,7 +62,7 @@ void DeleteCurrentScope ()
 	variableStacks.pop_back();
 }
 
-void ExitScope(std::ifstream & file)
+void ExitScope(ifstream & file)
 {
 	while (true) 
 	{
@@ -73,7 +75,7 @@ void ExitScope(std::ifstream & file)
 }
 
 // Cycle through all scopes from local to global and find if it exists, if not then it is global
-Variable &FindOrCreateVariable(const std::string &variableName )
+Variable &FindOrCreateVariable(const string &variableName )
 {
 	VariableMap::iterator iVar;
 	bool wasVarFound = false;
@@ -88,13 +90,13 @@ Variable &FindOrCreateVariable(const std::string &variableName )
 
 	if ( ! wasVarFound )
 	{
-		iVar = variableStacks.back().insert ( std::make_pair(variableName, std::string ("") ) ).first;
+		iVar = variableStacks.back().insert ( make_pair(variableName, string ("") ) ).first;
 	}  
 
 	return *iVar;
 }
 
-Variable* Find(const std::string &variableName )
+Variable* Find(const string &variableName )
 {
 	VariableMap::iterator iVar;
 	bool wasVarFound = false;
@@ -115,7 +117,7 @@ int main() {
 	CreateNewScope();
 
 	for (LinesOfCode::iterator it = code.begin(); it != code.end(); it++) {
-		std::string currentLine = *it;
+		string currentLine = *it;
 		if (currentLine == "{" ) // Create a new scope
 		{
 			CreateNewScope();
@@ -134,7 +136,7 @@ int main() {
 		else if (currentLine == ">") // output next line
 		{
 			it++;
-			std::cout << Find(*it)->second << std::endl;
+			cout << Find(*it)->second << endl;
 		} 
 		else if (currentLine == "?") // if next line is false, skip line after that
 		{
@@ -182,16 +184,16 @@ int main() {
 		}
 	}
 
-	std::cout << "-----------------------------------------------\n" << std::endl;
+	cout << "-----------------------------------------------\n" << endl;
 
 	for ( VariableStacks::iterator sIt = variableStacks.begin(); sIt != variableStacks.end(); sIt++)
 	{
-		std::cout << "Next scope" << std::endl;
+		cout << "Next scope" << endl;
 		for ( VariableMap::iterator it = sIt->begin(); it != sIt->end(); it++ )
 		{
-			std::cout << it->first << "=" << it->second << std::endl;
+			cout << it->first << "=" << it->second << endl;
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
-	std::cin.get();
+	cin.get();
 }
