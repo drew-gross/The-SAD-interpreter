@@ -7,11 +7,14 @@
 
 using namespace std;
 
-void DebugBreakIf (const bool & breakCondition)
+void DebugBreakIf (const bool &breakCondition)
 {
 	if ( breakCondition )
 		__debugbreak();
 }
+
+//why are we calling our pairs 'Variables'? I find this slightly confusing.
+//in fact, i dont see the point of these typedefs to begin with?
 
 typedef pair<const string, string> Variable;
 typedef map<const string, string> VariableMap;
@@ -24,29 +27,29 @@ LinesOfCode ReadFile(char const * fileName)
 {
 	ifstream inFile(fileName, ifstream::in);
 	LinesOfCode code;
+	string currentLine;
+	char currentChar = 0;
+
 	while (!inFile.eof()) 
 	{
-		string curLine;
-		char curChar = 0;
-		while (curChar != '\n' && !inFile.eof())
+		currentChar = inFile.get();
+		if(currentChar == '\n')
 		{
-			curChar = inFile.get();
-			if (curChar != '\n')
-			{
-				curLine+=(curChar);
-			}
+			code.push_back(currentLine);
+			continue;
 		}
-		code.push_back(curLine);
+		currentLine += currentChar;
 	}
+
 	return code;
 }
 
-bool contains(string const & str, char searchFor)
+bool contains(string const & searchIn, char const searchFor)
 {
-	return (str.find(searchFor) != -1);
+	return (searchIn.find(searchFor) != -1);
 }
 
-pair<string, string> split(string const & str, char splitter) {
+pair<string, string> split(string const & str, char const splitter) {
 	int splitterIndex = str.find(splitter);
 	string varName(str.substr(0, splitterIndex));
 	string varVal(str.substr(splitterIndex + 1, str.length() - splitterIndex));
@@ -57,25 +60,19 @@ void CreateNewScope ()
 {
 	variableStacks.push_back(VariableMap());
 }
+
 void DeleteCurrentScope ()
 {
 	variableStacks.pop_back();
 }
 
-void ExitScope(ifstream & file)
+void IgnoreRestOfScope(ifstream & file)
 {
-	while (true) 
-	{
-		char currentChar = file.get();
-		if (currentChar == '}') 
-		{
-			return;
-		}
-	}
+	while(file.get()!='}');
 }
 
 // Cycle through all scopes from local to global and find if it exists, if not then it is global
-Variable &FindOrCreateVariable(const string &variableName )
+Variable &FindOrCreateVariable(const string &variableName)
 {
 	VariableMap::iterator iVar;
 	bool wasVarFound = false;
